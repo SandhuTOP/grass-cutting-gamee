@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grass Cutting Game</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        #gameArea {
+            position: relative;
+            width: 500px;
+            height: 300px;
+            background-color: green;
+            margin: auto;
+            border: 3px solid black;
+            overflow: hidden;
+        }
+        .grass {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: lightgreen;
+        }
+        #mower {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: red;
+            top: 130px;
+            left: 10px;
+        }
+        #score {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+        #timer {
+            font-size: 20px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Grass Cutting Game</h1>
+    <p>Use arrow keys to move the mower and cut grass!</p>
+    <p id="score">Score: 0</p>
+    <p id="timer">Time Left: 30s</p>
+    <div id="gameArea">
+        <div id="mower"></div>
+    </div>
+
+    <script>
+        const mower = document.getElementById("mower");
+        const gameArea = document.getElementById("gameArea");
+        let score = 0;
+        let timeLeft = 30;
+
+        // Function to generate grass
+        function generateGrass() {
+            document.querySelectorAll(".grass").forEach(grass => grass.remove()); // Clear old grass
+            for (let i = 0; i < 30; i++) {
+                let grass = document.createElement("div");
+                grass.className = "grass";
+                grass.style.left = Math.random() * (gameArea.clientWidth - 20) + "px";
+                grass.style.top = Math.random() * (gameArea.clientHeight - 20) + "px";
+                gameArea.appendChild(grass);
+            }
+        }
+
+        generateGrass();
+
+        // Mower movement
+        document.addEventListener("keydown", (event) => {
+            let mowerLeft = mower.offsetLeft;
+            let mowerTop = mower.offsetTop;
+
+            if (event.key === "ArrowRight" && mowerLeft < gameArea.clientWidth - 50) {
+                mower.style.left = mowerLeft + 10 + "px";
+            } else if (event.key === "ArrowLeft" && mowerLeft > 0) {
+                mower.style.left = mowerLeft - 10 + "px";
+            } else if (event.key === "ArrowUp" && mowerTop > 0) {
+                mower.style.top = mowerTop - 10 + "px";
+            } else if (event.key === "ArrowDown" && mowerTop < gameArea.clientHeight - 50) {
+                mower.style.top = mowerTop + "px";
+            }
+
+            // Check for grass cutting
+            document.querySelectorAll(".grass").forEach(grass => {
+                let mowerRect = mower.getBoundingClientRect();
+                let grassRect = grass.getBoundingClientRect();
+
+                if (
+                    mowerRect.x < grassRect.x + grassRect.width &&
+                    mowerRect.x + mowerRect.width > grassRect.x &&
+                    mowerRect.y < grassRect.y + grassRect.height &&
+                    mowerRect.y + mowerRect.height > grassRect.y
+                ) {
+                    grass.remove();
+                    score++;
+                    document.getElementById("score").textContent = "Score: " + score;
+                }
+            });
+        });
+
+        // Timer countdown
+        let timerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById("timer").textContent = "Time Left: " + timeLeft + "s";
+
+            if (timeLeft === 0) {
+                clearInterval(timerInterval);
+                alert("Game Over! Final Score: " + score);
+            }
+        }, 1000);
+
+        // Regenerate grass every few seconds
+        setInterval(generateGrass, 5000);
+    </script>
+</body>
+</html>
